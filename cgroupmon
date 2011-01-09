@@ -20,23 +20,10 @@ except:
     print("    http://code.google.com/p/psutil/")
     sys.exit(1)
 from pwd import getpwuid
+from pym import CGroup
 
 if __name__ == "__main__":
     cdir = "/sys/fs/cgroup/user"
     if not os.path.isdir(cdir):
         cdir = "/dev/cgroup/user"
-    for i in os.listdir(cdir):
-        dirname = os.path.join(cdir, i)
-        if os.path.isdir(dirname):
-            print("CGroup: " + str(i))
-            print("  User: " + getpwuid(os.stat(dirname).st_uid).pw_name)
-            sharefile = open(os.path.join(dirname, "cpu.shares"), 'r')
-            print("  CPU shares: " + sharefile.readline().strip())
-            sharefile.close()
-            print("  Procs:")
-            procfile = open(os.path.join(dirname, "cgroup.procs"), 'r')
-            for pid in procfile:
-                proc = psutil.Process(int(pid))
-                print("    " + str(proc.pid) + "  " + proc.name)
-            procfile.close()
-            print("")
+    print(repr(CGroup.CGroup(cdir)).strip())
