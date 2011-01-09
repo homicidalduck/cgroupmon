@@ -11,7 +11,14 @@
 #   limitations under the License.
 
 import os
-import psutil
+import sys
+try:
+    import psutil
+except:
+    print("Error importing psutil")
+    print("If you do not have psutil installed, please get it:")
+    print("    http://code.google.com/p/psutil/")
+    sys.exit(1)
 from pwd import getpwuid
 
 if __name__ == "__main__":
