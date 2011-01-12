@@ -20,10 +20,23 @@ except:
     print("    http://code.google.com/p/psutil/")
     sys.exit(1)
 from pwd import getpwuid
-from pym import CGroup
+from pym.CGroup import CGroup
 
 if __name__ == "__main__":
     cdir = "/sys/fs/cgroup/user"
     if not os.path.isdir(cdir):
         cdir = "/dev/cgroup/user"
-    print(repr(CGroup.CGroup(cdir)).strip())
+    if "curses" in sys.argv:
+        try:
+            import curses
+        except:
+            print("Error importing curses")
+            print("Please make sure ncurses is installed via your package manager")
+            sys.exit(1)
+        from pym import CursesUI
+        CursesUI.run(cdir)
+    elif "gtk" in sys.argv:
+        print("GTK+ interface isn't working yet")
+    else:
+        print(repr(CGroup(cdir)).strip())
+    
