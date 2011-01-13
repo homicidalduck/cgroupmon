@@ -36,7 +36,10 @@ class CGroup:
             return False
         procfile = open(os.path.join(self.path, "cgroup.procs"), 'r')
         for pid in procfile:
-            self.procs.append(psutil.Process(int(pid)))
+            try:
+                self.procs.append(psutil.Process(int(pid)))
+            except:
+                pass
         procfile.close()
         subgroupids = []
         for i in self.subgroups:
@@ -57,7 +60,10 @@ class CGroup:
         ret = ret + "  CPU Shares: " + self.shares + "\n"
         ret = ret + "  Procs:\n"
         for i in self.procs:
-            ret = ret + "    " + str(i.pid) + "  " + i.name + "\n"
+            try:
+                ret = ret + "    " + str(i.pid) + "  " + i.name + "\n"
+            except:
+                pass
         if self.subgroups:
             ret = ret + "  SubCGroups:\n    "
             for i in self.subgroups:

@@ -35,7 +35,11 @@ def display(scrn, cgrp, offset):
     scrn.refresh()
     
 def run(cdir):
-    "Runs the Curses UI"
+    """Runs the Curses UI
+    'j': scroll down
+    'k': scroll up
+    'u': update cgroups
+    'q': quit"""
     try:
         scrn = curses.initscr()
         curses.noecho()
@@ -50,9 +54,15 @@ def run(cdir):
                 if offset < (len(repr(cgrp).split('\n')) - curses.LINES):
                     offset = offset + 1
                     display(scrn, cgrp, offset)
+                elif offset > (len(repr(cgrp).split('\n')) - curses.LINES):
+                    offset = len(repr(cgrp).split('\n')) - curses.LINES
+                    display(scrn, cgrp, offset)
             elif c == 'k':
                 if offset > 0:
-                    offset = offset - 1
+                    if offset > (len(repr(cgrp).split('\n')) - curses.LINES):
+                        offset = len(repr(cgrp).split('\n')) - curses.LINES
+                    else:
+                        offset = offset - 1
                     display(scrn, cgrp, offset)
             elif c == 'u':
                 if not cgrp.update(): break
