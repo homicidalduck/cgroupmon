@@ -23,14 +23,14 @@ class CGroup:
             return
         self.id = os.path.basename(self.path)
         self.user = getpwuid(os.stat(self.path).st_uid).pw_name
-        sharefile = open(os.path.join(self.path, "cpu.shares"), 'r')
-        self.shares = sharefile.readline().strip()
-        sharefile.close()
         self.subgroups = []
         self.update()
         
     def update(self):
         "Updates processes, returns False if cgroup is no longer active, else True"
+        sharefile = open(os.path.join(self.path, "cpu.shares"), 'r')
+        self.shares = sharefile.readline().strip()
+        sharefile.close()
         self.procs=[]
         if not os.path.isdir(self.path):
             return False
