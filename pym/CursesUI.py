@@ -21,11 +21,11 @@ def restorescreen():
     curses.echo()
     curses.endwin()
 
-def display(scrn, cgrp, offset):
+def display(scrn, buff, offset):
     "Updates the screen"
     row = 0
     scrn.clear()
-    for line in repr(cgrp).split('\n'):
+    for line in buff:
         if offset > 0:
             offset = offset - 1
         elif row < curses.LINES:
@@ -33,6 +33,10 @@ def display(scrn, cgrp, offset):
             row = row + 1
         else: break
     scrn.refresh()
+
+def newbuffer(cgrp):
+    "Updates the buffer"
+    return repr(cgrp).split('\n')
     
 def run(cdir):
     """Runs the Curses UI
@@ -46,27 +50,29 @@ def run(cdir):
         curses.cbreak()
         cgrp = CGroup(cdir)
         offset = 0
-        display(scrn, cgrp, offset)
+        buff = newbuffer(cgrp)
+        display(scrn, buff, offset)
         while True:
             c = scrn.getch()
             c = chr(c)
             if c == 'j':
-                if offset < (len(repr(cgrp).split('\n')) - curses.LINES):
+                if offset < (len(buff) - curses.LINES):
                     offset = offset + 1
-                    display(scrn, cgrp, offset)
-                elif offset > (len(repr(cgrp).split('\n')) - curses.LINES):
-                    offset = len(repr(cgrp).split('\n')) - curses.LINES
-                    display(scrn, cgrp, offset)
+                    display(scrn, buff, offset)
+                elif offset > (len(buff) - curses.LINES):
+                    offset = len(buff) - curses.LINES
+                    display(scrn, buff, offset)
             elif c == 'k':
                 if offset > 0:
-                    if offset > (len(repr(cgrp).split('\n')) - curses.LINES):
-                        offset = len(repr(cgrp).split('\n')) - curses.LINES
+                    if offset > (len(buff) - curses.LINES):
+                        offset = len(buff) - curses.LINES
                     else:
                         offset = offset - 1
-                    display(scrn, cgrp, offset)
+                    display(scrn, buff, offset)
             elif c == 'u':
                 if not cgrp.update(): break
-                display(scrn, cgrp, offset)
+                buff = newbuffer(cgrp)
+                display(scrn, buff, offset)
             elif c == 'q': break
         restorescreen()
     except:
