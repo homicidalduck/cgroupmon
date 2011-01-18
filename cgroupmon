@@ -20,13 +20,29 @@ except:
     print("    http://code.google.com/p/psutil/")
     sys.exit(1)
 from pwd import getpwuid
-from CGroupMon.CGroup import CGroup
+try:
+    from CGroupMon.CGroup import CGroup
+    from CGroupMon.Config import Config
+except:
+    print("Error importing CGroupMon modules, are your path settings correct?")
+    sys.exit(1)
 
 if __name__ == "__main__":
     cdir = "/sys/fs/cgroup/user"
     if not os.path.isdir(cdir):
         cdir = "/dev/cgroup/user"
+    cfg = Config()
+    configfile = os.path.expanduser('~/.cgroupmon')
+    if(os.path.exists(configfile)):
+        cfg.loadconfig(configfile)
     if "curses" in sys.argv:
+        cfg.settings['ui'] = 'curses'
+    elif "gtk" in sys.argv:
+        print("GTK+ interface isn't working yet")
+        if 'ui' in cfg.settings: del(cfg.settings['ui'])
+    elif "echo" in sys.argv:
+        if 'ui' in cfg.settings: del(cfg.settings['ui'])
+    if(('ui' in cfg.settings) and (cfg.settings['ui'] == 'curses')):
         try:
             import curses
         except:
@@ -34,9 +50,8 @@ if __name__ == "__main__":
             print("Please make sure ncurses is installed via your package manager")
             sys.exit(1)
         from CGroupMon import CursesUI
-        CursesUI.run(cdir)
-    elif "gtk" in sys.argv:
-        print("GTK+ interface isn't working yet")
+        CursesUI.run(cdir, config=cfg)
+        sys.exit(0)
     else:
         print(repr(CGroup(cdir)).strip())
-    
+        sys.exit(0)

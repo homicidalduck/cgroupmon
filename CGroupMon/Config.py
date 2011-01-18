@@ -10,15 +10,19 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from distutils.core import setup
+import re
 
-setup(name='cgroupmon',
-      version='0.1b0',
-      description='CGroup monitor',
-      author='Matt Larson',
-      author_email='larson.matt8@gmail.com',
-      url='https://github.com/homicidalduck/cgroupmon',
-      license='Apache 2.0',
-      scripts=['cgroupmon'],
-      packages=['CGroupMon']
-      )
+class Config:
+    def __init__(self, configfile = None):
+        self.settings = {}
+        if configfile != None:
+            self.loadconfig(configfile)
+
+    def loadconfig(self, configfile):
+        f = open(configfile)
+        configtext = f.read()
+        f.close()
+        pattern = re.compile(r'\s*([\w]*)\s*=\s*([\w]*)')
+        tuples = re.findall(pattern, configtext)
+        for term in tuples:
+            self.settings[term[0].lower()] = term[1].lower()

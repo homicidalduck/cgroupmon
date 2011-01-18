@@ -14,6 +14,7 @@ import curses
 import traceback
 import os
 from CGroup import CGroup
+from Config import Config
 
 def restorescreen():
     "Restores the terminal back to normal operation mode"
@@ -36,9 +37,9 @@ def display(scrn, buff, offset):
 
 def newbuffer(cgrp):
     "Updates the buffer"
-    return repr(cgrp).split('\n')
+    return repr(cgrp).strip().split('\n')
     
-def run(cdir):
+def run(cdir, config = None):
     """Runs the Curses UI
     'j': scroll down
     'k': scroll up
