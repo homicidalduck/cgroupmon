@@ -20,7 +20,7 @@ except:
     print("    http://code.google.com/p/psutil/")
     sys.exit(1)
 from pwd import getpwuid
-from pym.CGroup import CGroup
+from CGroupMon.CGroup import CGroup
 
 if __name__ == "__main__":
     cdir = "/sys/fs/cgroup/user"
@@ -33,7 +33,7 @@ if __name__ == "__main__":
             print("Error importing curses")
             print("Please make sure ncurses is installed via your package manager")
             sys.exit(1)
-        from pym import CursesUI
+        from CGroupMon import CursesUI
         CursesUI.run(cdir)
     elif "gtk" in sys.argv:
         print("GTK+ interface isn't working yet")
