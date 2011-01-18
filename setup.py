@@ -13,7 +13,7 @@
 from distutils.core import setup
 
 setup(name='cgroupmon',
-      version='0.1b0',
+      version='0.1b1',
       description='CGroup monitor',
       author='Matt Larson',
       author_email='larson.matt8@gmail.com',
