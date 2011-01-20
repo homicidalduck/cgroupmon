@@ -48,9 +48,6 @@ if __name__ == "__main__":
             sys.exit(1)
     if "curses" in sys.argv:
         cfg.settings['ui'] = 'curses'
-    elif "gtk" in sys.argv:
-        print("GTK+ interface isn't working yet")
-        if 'ui' in cfg.settings: del(cfg.settings['ui'])
     elif "echo" in sys.argv:
         if 'ui' in cfg.settings: del(cfg.settings['ui'])
     if(('ui' in cfg.settings) and (cfg.settings['ui'] == 'curses')):
@@ -64,5 +61,7 @@ if __name__ == "__main__":
         CursesUI.run(cfg.settings['cdir'], config=cfg)
         sys.exit(0)
     else:
+        if 'ui' in cfg.settings:
+            print("UI in config file not recognized, use curses or echo", file=sys.stderr)
         print(repr(CGroup(cfg.settings['cdir'])).strip())
         sys.exit(0)
