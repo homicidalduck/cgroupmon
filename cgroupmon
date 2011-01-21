@@ -57,8 +57,8 @@ if __name__ == "__main__":
             print("Error importing curses", file=sys.stderr)
             print("Please make sure ncurses is installed via your package manager", file=sys.stderr)
             sys.exit(1)
-        from CGroupMon import CursesUI
-        CursesUI.run(cfg.settings['cdir'], config=cfg)
+        from CGroupMon.CursesUI import CursesUI
+        CursesUI(cfg.settings['cdir'], config=cfg).run()
         sys.exit(0)
     else:
         if 'ui' in cfg.settings:

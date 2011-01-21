@@ -16,66 +16,70 @@ import os
 from CGroup import CGroup
 from Config import Config
 
-def restorescreen():
-    "Restores the terminal back to normal operation mode"
-    curses.nocbreak()
-    curses.echo()
-    curses.endwin()
+class CursesUI():
+    def __init__(self, cdir, config = None):
+        self.offset = 0
+        self.cgrp = CGroup(cdir)
+        self.updatebuffer()
+        
+    def restorescreen(self):
+        "Restores the terminal back to normal operation mode"
+        curses.nocbreak()
+        curses.echo()
+        curses.endwin()
 
-def display(scrn, buff, offset):
-    "Updates the screen"
-    row = 0
-    scrn.clear()
-    for line in buff:
-        if offset > 0:
-            offset = offset - 1
-        elif row < curses.LINES:
-            scrn.addstr(row, 0, line)
-            row = row + 1
-        else: break
-    scrn.refresh()
+    def display(self):
+        "Updates the screen"
+        row = 0
+        self.scrn.clear()
+        tmpoffset = self.offset
+        for line in self.buffer:
+            if tmpoffset > 0:
+                tmpoffset = tmpoffset - 1
+            elif row < curses.LINES:
+                self.scrn.addstr(row, 0, line)
+                row = row + 1
+            else: break
+        self.scrn.refresh()
 
-def newbuffer(cgrp):
-    "Updates the buffer"
-    return repr(cgrp).strip().split('\n')
+    def updatebuffer(self):
+        "Updates the buffer"
+        self.buffer = repr(self.cgrp).strip().split('\n')
     
-def run(cdir, config = None):
-    """Runs the Curses UI
-    'j': scroll down
-    'k': scroll up
-    'u': update cgroups
-    'q': quit"""
-    try:
-        scrn = curses.initscr()
-        curses.noecho()
-        curses.cbreak()
-        cgrp = CGroup(cdir)
-        offset = 0
-        buff = newbuffer(cgrp)
-        display(scrn, buff, offset)
-        while True:
-            c = scrn.getch()
-            c = chr(c)
-            if c == 'j':
-                if offset < (len(buff) - curses.LINES):
-                    offset = offset + 1
-                    display(scrn, buff, offset)
-                elif offset > (len(buff) - curses.LINES):
-                    offset = len(buff) - curses.LINES
-                    display(scrn, buff, offset)
-            elif c == 'k':
-                if offset > 0:
-                    if offset > (len(buff) - curses.LINES):
-                        offset = len(buff) - curses.LINES
-                    else:
-                        offset = offset - 1
-                    display(scrn, buff, offset)
-            elif c == 'u':
-                if not cgrp.update(): break
-                buff = newbuffer(cgrp)
-                display(scrn, buff, offset)
-            elif c == 'q': break
-        restorescreen()
-    except:
-        restorescreen()
-        traceback.print_exc()
+    def run(self):
+        """Runs the Curses UI
+        'j': scroll down
+        'k': scroll up
+        'u': update cgroups
+        'q': quit"""
+        try:
+            self.scrn = curses.initscr()
+            curses.noecho()
+            curses.cbreak()
+            self.display()
+            while True:
+                c = self.scrn.getch()
+                c = chr(c)
+                if c == 'j':
+                    if self.offset < (len(self.buffer) - curses.LINES):
+                        self.offset = self.offset + 1
+                        self.display()
+                    elif self.offset > (len(self.buffer) - curses.LINES):
+                        self.offset = len(self.buffer) - curses.LINES
+                        self.display()
+                elif c == 'k':
+                    if self.offset > 0:
+                        if self.offset > (len(self.buffer) - curses.LINES):
+                            self.offset = len(self.buffer) - curses.LINES
+                        else:
+                            self.offset = self.offset - 1
+                            self.display()
+                elif c == 'u':
+                        if not self.cgrp.update(): break
+                        self.updatebuffer()
+                        self.display()
+                elif c == 'q': break
+            self.restorescreen()
+        except:
+            self.restorescreen()
+            traceback.print_exc()
