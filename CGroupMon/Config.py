@@ -20,9 +20,10 @@ class Config:
 
     def loadconfig(self, configfile):
         f = open(configfile)
-        configtext = f.read()
-        f.close()
         pattern = re.compile(r'\s*([\S]*)\s*=\s*([\S]*)')
-        tuples = re.findall(pattern, configtext)
-        for term in tuples:
-            self.settings[term[0].lower()] = term[1].lower()
+        for line in f:
+            if not line.strip().startswith("#"):
+                term = re.search(pattern, line).groups()
+                self.settings[term[0].lower()] = term[1].lower()
+        f.close()
+        
