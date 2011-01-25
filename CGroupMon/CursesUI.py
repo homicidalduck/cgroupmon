@@ -17,6 +17,7 @@ from CGroup import CGroup
 from Config import Config
 
 class CursesUI():
+    "The cgroupmon curses interface"
     def __init__(self, cdir, config = None):
         self.offset = 0
         self.cgrp = CGroup(cdir)

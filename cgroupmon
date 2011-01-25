@@ -39,7 +39,7 @@ if __name__ == "__main__":
     if 'cdir' not in cfg.settings:
         import re
         import subprocess
-        pattern = re.compile("cgroup on (\S*) type cgroup")
+        pattern = re.compile("[\w]* on (\S*) type cgroup")
         p = subprocess.Popen("mount", stdout=subprocess.PIPE)
         cfg.settings['cdir'] = re.search(pattern, p.stdout.read()).groups()[0] + '/user'
         if not os.path.isdir(cfg.settings['cdir']):
