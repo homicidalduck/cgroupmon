@@ -10,7 +10,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+from __future__ import print_function
 import os
+import sys
 from pwd import getpwuid
 import psutil
 
@@ -19,8 +21,7 @@ class CGroup:
     def __init__(self, path):
         self.path = os.path.abspath(path)
         if not os.path.isdir(self.path):
-            print("Error: path does not exist")
-            return
+            print("Error: path does not exist", file=sys.stderr)
         self.id = os.path.basename(self.path)
         self.user = getpwuid(os.stat(self.path).st_uid).pw_name
         self.subgroups = []

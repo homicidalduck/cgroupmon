@@ -17,7 +17,8 @@ try:
     import psutil
 except:
     print("Error importing psutil", file=sys.stderr)
-    print("If you do not have psutil installed, please get it:", file=sys.stderr)
+    print("If you do not have psutil installed, please get it:",
+          file=sys.stderr)
     print("    http://code.google.com/p/psutil/", file=sys.stderr)
     sys.exit(1)
 from pwd import getpwuid
@@ -30,38 +31,48 @@ except:
 
 if __name__ == "__main__":
     cfg = Config()
+    #Load config file if it exists
     configfile = os.path.expanduser('~/.cgroupmon')
     if(os.path.exists(configfile)):
         cfg.loadconfig(configfile)
+    #Check if cgroup directory provided in config exists
     if ('cdir' in cfg.settings) and not (os.path.isdir(cfg.settings['cdir'])):
-        print("cdir in config file does not exist, attempting to autodetect", file=sys.stderr)
+        print("cdir in config file does not exist, attempting to autodetect",
+              file=sys.stderr)
         del(cfg.settings['cdir'])
+    #Attempt to find mounted cgroup directory
     if 'cdir' not in cfg.settings:
         import re
         import subprocess
         pattern = re.compile("[\w]* on (\S*) type cgroup")
         p = subprocess.Popen("mount", stdout=subprocess.PIPE)
-        cfg.settings['cdir'] = re.search(pattern, p.stdout.read()).groups()[0] + '/user'
+        cfg.settings['cdir'] = re.search(pattern, p.stdout.read()).groups()[0]\
+            + '/user'
         if not os.path.isdir(cfg.settings['cdir']):
             print("Could not find a valid cgroup directory", file=sys.stderr)
             print("Make sure your cgroup directory is mounted", file=sys.stderr)
             sys.exit(1)
+    #Lets command line options override config file for interface
     if "curses" in sys.argv:
         cfg.settings['ui'] = 'curses'
     elif "echo" in sys.argv:
         cfg.settings['ui'] = 'echo'
+    #Run the curses interface
     if(('ui' in cfg.settings) and (cfg.settings['ui'] == 'curses')):
         try:
             import curses
         except:
             print("Error importing curses", file=sys.stderr)
-            print("Please make sure ncurses is installed via your package manager", file=sys.stderr)
+            print("Please make sure ncurses is installed via your package "
+                  + "manager", file=sys.stderr)
             sys.exit(1)
         from CGroupMon.CursesUI import CursesUI
         CursesUI(cfg.settings['cdir'], config=cfg).run()
         sys.exit(0)
     else:
         if ('ui' in cfg.settings) and (cfg.settings['ui'] != "echo"):
-            print("UI in config file not recognized, use curses or echo", file=sys.stderr)
+            print("UI in config file not recognized, use curses or echo",
+                  file=sys.stderr)
+        #Defaults to echo interface
         print(repr(CGroup(cfg.settings['cdir'])).strip())
         sys.exit(0)
