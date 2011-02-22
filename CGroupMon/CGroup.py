@@ -29,6 +29,8 @@ class CGroup:
         
     def update(self):
         "Updates processes, returns False if cgroup is no longer active, else True"
+        if not os.path.isdir(self.path):
+            return False
         sharefile = open(os.path.join(self.path, "cpu.shares"), 'r')
         self.shares = sharefile.readline().strip()
         sharefile.close()
