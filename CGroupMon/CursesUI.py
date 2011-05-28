@@ -18,9 +18,9 @@ from Config import Config
 
 class CursesUI():
     "The cgroupmon curses interface"
-    def __init__(self, cdir, config = None):
+    def __init__(self, cgroupdir, config = None):
         self.offset = 0
-        self.cgrp = CGroup(cdir)
+        self.cgrp = CGroup(cgroupdir)
         self.updatebuffer()
         
     def restorescreen(self):
