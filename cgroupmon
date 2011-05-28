@@ -13,6 +13,7 @@
 from __future__ import print_function
 import os
 import sys
+from ConfigParser import SafeConfigParser
 try:
     import psutil
 except:
@@ -24,40 +25,43 @@ except:
 from pwd import getpwuid
 try:
     from CGroupMon.CGroup import CGroup
-    from CGroupMon.Config import Config
 except:
     print("Error importing CGroupMon modules, are your path settings correct?")
     sys.exit(1)
 
 if __name__ == "__main__":
-    cfg = Config()
+    config = SafeConfigParser()
     #Load config file if it exists
     configfile = os.path.expanduser('~/.cgroupmon')
     if(os.path.exists(configfile)):
-        cfg.loadconfig(configfile)
+        config.read(configfile)
     #Check if cgroup directory provided in config exists
-    if ('cgroupdir' in cfg.settings) and not (os.path.isdir(cfg.settings['cgroupdir'])):
-        print("cgroupdir in config file does not exist, attempting to autodetect",
+    if (config.has_option('default', 'cgroupdir')) and not \
+            (os.path.isdir(config.get('default', 'cgroupdir'))):
+        print("cgroupdir in config file does not exist, attempting to" + 
+              " autodetect",
               file=sys.stderr)
-        del(cfg.settings['cgroupdir'])
+        config.remove_option('default', 'cgroupdir')
     #Attempt to find mounted cgroup directory
-    if 'cgroupdir' not in cfg.settings:
+    if not config.has_option('default', 'cgroupdir'):
         import re
         import subprocess
         pattern = re.compile("[\w]* on (\S*) type cgroup")
         p = subprocess.Popen("mount", stdout=subprocess.PIPE)
-        cfg.settings['cgroupdir'] = re.search(pattern, p.stdout.read()).groups()[0]
-        if not os.path.isdir(cfg.settings['cgroupdir']):
+        config.set('default', 'cgroupdir',
+                       re.search(pattern, p.stdout.read()).groups()[0])
+        if not os.path.isdir(config.get('default', 'cgroupdir')):
             print("Could not find a valid cgroup directory", file=sys.stderr)
             print("Make sure your cgroup directory is mounted", file=sys.stderr)
             sys.exit(1)
     #Lets command line options override config file for interface
     if "curses" in sys.argv:
-        cfg.settings['ui'] = 'curses'
+        config.set('default', 'ui', 'curses')
     elif "echo" in sys.argv:
-        cfg.settings['ui'] = 'echo'
+        config.set('default', 'ui', 'echo')
     #Run the curses interface
-    if(('ui' in cfg.settings) and (cfg.settings['ui'] == 'curses')):
+    if((config.has_option('default', 'ui')) and (config.get('default', 'ui') 
+                                                 == 'curses')):
         try:
             import curses
         except:
@@ -66,12 +70,13 @@ if __name__ == "__main__":
                   + "manager", file=sys.stderr)
             sys.exit(1)
         from CGroupMon.CursesUI import CursesUI
-        CursesUI(cfg.settings['cgroupdir'], config=cfg).run()
+        CursesUI(config.get('default', 'cgroupdir'), config=config).run()
         sys.exit(0)
     else:
-        if ('ui' in cfg.settings) and (cfg.settings['ui'] != "echo"):
+        if (config.has_option('default', 'ui')) and \
+                (config.get('default', 'ui') != "echo"):
             print("UI in config file not recognized, use curses or echo",
                   file=sys.stderr)
         #Defaults to echo interface
-        print(repr(CGroup(cfg.settings['cgroupdir'])).strip())
+        print(repr(CGroup(config.get('default', 'cgroupdir'))).strip())
         sys.exit(0)

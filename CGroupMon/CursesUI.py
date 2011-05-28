@@ -14,7 +14,7 @@ import curses
 import traceback
 import os
 from CGroup import CGroup
-from Config import Config
+from ConfigParser import SafeConfigParser
 
 class CursesUI():
     "The cgroupmon curses interface"
