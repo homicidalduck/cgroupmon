@@ -22,6 +22,7 @@ class CursesUI():
         self.offset = 0
         self.cgrp = CGroup(cgroupdir)
         self.updatebuffer()
+        self.currentsubgroup = None
         
     def restorescreen(self):
         "Restores the terminal back to normal operation mode"
@@ -49,8 +50,8 @@ class CursesUI():
     
     def run(self):
         """Runs the Curses UI
-        'j': scroll down
-        'k': scroll up
+        'l': scroll down
+        'h': scroll up
         'u': update cgroups
         'q': quit"""
         try:
@@ -62,13 +63,48 @@ class CursesUI():
                 c = self.scrn.getch()
                 c = chr(c)
                 if c == 'j':
+                    if len(self.cgrp.subgroups) != 0:
+                        try:
+                            index = self.cgrp.subgroups.index( \
+                                self.currentsubgroup)
+                        except:
+                            index = -1
+                        if len(self.cgrp.subgroups) > index + 1:
+                            self.currentsubgroup = self.cgrp.subgroups[index+1]
+                            cgroupname = repr(self.currentsubgroup).split( \
+                                '\n')[0]
+                            for line in self.buffer:
+                                if cgroupname == line.strip():
+                                    self.offset = self.buffer.index(line)
+                                    break
+                            self.display()
+                elif c == 'k':
+                    if len(self.cgrp.subgroups) != 0:
+                        try:
+                            index = self.cgrp.subgroups.index( \
+                                self.currentsubgroup)
+                        except:
+                            index = -1
+                        if index > 0:
+                            self.currentsubgroup = self.cgrp.subgroups[index-1]
+                            cgroupname = repr(self.currentsubgroup).split( \
+                                '\n')[0]
+                            for line in self.buffer:
+                                if cgroupname == line.strip():
+                                    self.offset = self.buffer.index(line)
+                                    break
+                        else:
+                            self.currentsubgroup = None
+                            self.offset = 0
+                        self.display()
+                elif c == 'l':
                     if self.offset < (len(self.buffer) - curses.LINES):
                         self.offset = self.offset + 1
                         self.display()
                     elif self.offset > (len(self.buffer) - curses.LINES):
                         self.offset = len(self.buffer) - curses.LINES
                         self.display()
-                elif c == 'k':
+                elif c == 'h':
                     if self.offset > 0:
                         if self.offset > (len(self.buffer) - curses.LINES):
                             self.offset = len(self.buffer) - curses.LINES
